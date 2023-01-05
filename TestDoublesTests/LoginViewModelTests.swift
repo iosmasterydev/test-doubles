@@ -3,7 +3,7 @@ import XCTest
 
 
 final class LoginViewModelTests: XCTestCase {
-  
+
   func test_error_is_not_nil_if_service_sends_a_network_error() async {
     let sut = LoginViewModel(loginService: LoginServiceSadPathStub())
     
@@ -57,7 +57,7 @@ final class LoginViewModelTests: XCTestCase {
 }
 
 
-  // MARK: - Stubs
+// MARK: - Stubs
 class LoginServiceHappyPathStub: LoginService {
   func attemptLogin(email: String, password: String) async throws -> Token {
     return Token(
@@ -74,7 +74,7 @@ class LoginServiceSadPathStub: LoginService {
 }
 
 
-  // MARK: - Mocks
+// MARK: - Mocks
 private class LoginServiceHappyPathMock: LoginService {
   var error: NSError?
   var loginCalled: Int = 0

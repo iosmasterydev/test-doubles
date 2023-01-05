@@ -51,7 +51,7 @@ struct DefaultLoginService: LoginService {
     request.httpBody = try? JSONEncoder().encode(payload)
     let (data, _) = try await URLSession.shared.data(for: request)
     guard let token = try? JSONDecoder().decode(Token.self, from: data) else {
-      throw NSError(domain: "decoding-error", code: 1)
+      throw NSError(domain: "decoding-error", code: 0)
     }
     return token
   }
