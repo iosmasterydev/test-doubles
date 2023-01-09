@@ -19,9 +19,14 @@ final class LoginViewModel: ObservableObject {
   @Published var password: String = ""
   
   private let loginService: LoginService
+  private let loggerService: LoggerService
   
-  init(loginService: LoginService = DefaultLoginService()) {
+  init(
+    loginService: LoginService,
+    loggerService: LoggerService
+  ) {
     self.loginService = loginService
+    self.loggerService = loggerService
   }
   
   @MainActor
@@ -31,6 +36,7 @@ final class LoginViewModel: ObservableObject {
         email: email,
         password: password
       )
+//      loggerService.log(email: email)
     } catch {
       self.error = error
     }
@@ -43,6 +49,18 @@ protocol LoginService {
   func attemptLogin(email: String, password: String) async throws -> Token
 }
 
+protocol LoggerService {
+  func log(email: String)
+}
+
+
+struct DefaultLoggerService: LoggerService {
+  func log(email: String) {
+    print(email, "logged at \(Date.now.formatted())")
+  }
+}
+
+
 struct DefaultLoginService: LoginService {
   
   func attemptLogin(email: String, password: String) async throws -> Token {
@@ -54,6 +72,34 @@ struct DefaultLoginService: LoginService {
       throw NSError(domain: "decoding-error", code: 0)
     }
     return token
+  }
+  
+}
+
+
+class A {
+  
+  func sum(number1: Int, number2: Int) -> Int {
+    return number1 + number2
+  }
+  
+}
+
+
+class B {
+  let number1: Int = 1
+  let number2: Int = 2
+  
+  let a: A
+  
+  init(a: A) {
+    self.a = a
+  }
+  
+  func doSomething() {
+    let result = a.sum(number1: number1, number2: number2)
+    // do something with the result
+    // ....
   }
   
 }

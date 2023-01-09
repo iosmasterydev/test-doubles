@@ -5,7 +5,10 @@ import XCTest
 final class LoginViewModelTests: XCTestCase {
 
   func test_error_is_not_nil_if_service_sends_a_network_error() async {
-    let sut = LoginViewModel(loginService: LoginServiceSadPathStub())
+    let sut = LoginViewModel(
+      loginService: LoginServiceSadPathStub(),
+      loggerService: LoggerServiceMock()
+    )
     
     await sut.login()
     
@@ -13,7 +16,10 @@ final class LoginViewModelTests: XCTestCase {
   }
   
   func test_token_is_not_nil_when_the_api_sent_a_successful_response() async {
-    let sut = LoginViewModel(loginService: LoginServiceHappyPathStub())
+    let sut = LoginViewModel(
+      loginService: LoginServiceHappyPathStub(),
+      loggerService: LoggerServiceMock()
+    )
     
     await sut.login()
     
@@ -22,17 +28,24 @@ final class LoginViewModelTests: XCTestCase {
   }
   
   func test_attemptLogin_is_only_called_once() async {
-    let mock = LoginServiceHappyPathMock()
-    let sut = LoginViewModel(loginService: mock)
+    let loginMock = LoginServiceHappyPathMock()
+    let loggerMock = LoggerServiceMock()
+    let sut = LoginViewModel(
+      loginService: loginMock,
+      loggerService: loggerMock
+    )
     
     await sut.login()
     
-    XCTAssertEqual(mock.loginCalled, 1)
+    XCTAssertEqual(loginMock.loginCalledCount, 1)
   }
   
   func test_attemptLogin_throws_an_error_when_service_sends_network_error() async {
     let mock = LoginServiceSadPathMock()
-    let sut = LoginViewModel(loginService: mock)
+    let sut = LoginViewModel(
+      loginService: mock,
+      loggerService: LoggerServiceMock()
+    )
     
     await sut.login()
     
@@ -42,7 +55,7 @@ final class LoginViewModelTests: XCTestCase {
   
   func test_right_arguments_are_passed() async {
     let spy = LoginServiceSpy()
-    let sut = LoginViewModel(loginService: spy)
+    let sut = LoginViewModel(loginService: spy, loggerService: LoggerServiceMock())
     sut.email = "hello@gmail.com"
     sut.password = "password"
     
@@ -75,12 +88,21 @@ class LoginServiceSadPathStub: LoginService {
 
 
 // MARK: - Mocks
+private class LoggerServiceMock: LoggerService {
+  var logCalledCount: Int = 0
+  
+  func log(email: String) {
+    logCalledCount += 1
+  }
+}
+
+
 private class LoginServiceHappyPathMock: LoginService {
   var error: NSError?
-  var loginCalled: Int = 0
+  var loginCalledCount: Int = 0
   
   func attemptLogin(email: String, password: String) async throws -> Token {
-    loginCalled += 1
+    loginCalledCount += 1
     return Token(
       value: "jwt-token",
       expiryDate: .now.addingTimeInterval(60 * 30)
@@ -90,7 +112,7 @@ private class LoginServiceHappyPathMock: LoginService {
 }
 
 
-class LoginServiceSadPathMock: LoginService {
+private class LoginServiceSadPathMock: LoginService {
   var error: NSError?
   var loginCalled: Int = 0
   
